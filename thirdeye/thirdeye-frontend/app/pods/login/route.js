@@ -31,8 +31,13 @@ export default Route.extend(UnauthenticatedRouteMixin, {
   setupController(controller, model) {
     this._super(...arguments);
     const errorMsg = get(this, 'session.store.errorMsg');
+    debugger;
     if (errorMsg) {
       controller.set('errorMessage', errorMsg);
+    }
+
+    if (controller.fromUrl) {
+      this.set('session.store.fromUrl', {deeplink: controller.fromUrl});
     }
   },
 

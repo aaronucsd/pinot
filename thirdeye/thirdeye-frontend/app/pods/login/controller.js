@@ -8,13 +8,20 @@ export default Controller.extend({
   session: service(),
 
 
-  _makeTransition(fromUrl, session) {
+  _makeTransition(fromUrl = null, session) {
     const sessionFromUrl = get(session, 'store.fromUrl');
-    const lastIntentTransition = sessionFromUrl.lastIntentTransition.intent;
-    const name = lastIntentTransition.name;
+    const lastIntentTransition = sessionFromUrl && sessionFromUrl.lastIntentTransition ? sessionFromUrl.lastIntentTransition.intent : null;
+    const name = lastIntentTransition ? lastIntentTransition.name : null;
+    const deepLink = sessionFromUrl && sessionFromUrl.deeplink ? sessionFromUrl.deeplink : fromUrl;
 
-    if (fromUrl) {
-      this.transitionToRoute(fromUrl);
+    if (deepLink) {
+      const origin = window.location.origin;
+      // check for unique links or external links
+      if (deepLink.indexOf(origin) > -1) {
+        window.location.replace(deepLink);
+      } else {
+        this.transitionToRoute(deepLink);
+      }
     } else if (lastIntentTransition && name) {
       const queryParams = lastIntentTransition.queryParams;
       const contexts = lastIntentTransition.contexts;
@@ -42,7 +49,7 @@ export default Controller.extend({
       const fromUrl = this.get('fromUrl');
       const session = get(this, 'session');
       const errorMsg = get(session, 'store.errorMsg');
-
+debugger
       // reset the messages locally and in the session's store
       this.set('errorMessage', null);
       this.set('session.store.errorMsg', null);
